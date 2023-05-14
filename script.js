@@ -199,6 +199,10 @@ function draw() {
     // all array iteration counter
     text('iteration through array', 150, 30);
     text(iterationThroughArrayCounter, 150, 60)
+    // hint
+    fill(color(255, 255, 255));
+    textSize(18);
+    text("press \'a\' to start sorting", 400, 30)
 }
 
 class Value {
