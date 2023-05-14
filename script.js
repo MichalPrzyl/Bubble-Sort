@@ -13,6 +13,8 @@ let isSwapping;
 
 // misc
 let speed;
+let firstSwapFinished;
+let secondSwapFinished;
 
 function getRandomMinMax(min, max) {
     return Math.random() * (max - min) + min;
@@ -77,6 +79,10 @@ function change2ValuesXWhileSwapping(val1, val2){
             val1.x -= speed;
         }
     }
+    else{
+        firstSwapFinished = true;
+    }
+
 
     if(val2.x != val1.old_x){
         if ((val2.x - val1.old_x) > 0) {
@@ -85,6 +91,16 @@ function change2ValuesXWhileSwapping(val1, val2){
         else {
             val2.x += speed;
         }
+    }
+    else{
+        secondSwapFinished = true;
+    }
+    if (firstSwapFinished && secondSwapFinished){
+        isSwapping = false;
+        val1.old_x = val1.x;
+        val2.old_x = val2.x;
+        firstSwapFinished = false;
+        secondSwapFinished = false;
     }
 }
 
