@@ -15,6 +15,11 @@ let isSwapping;
 let speed;
 let firstSwapFinished;
 let secondSwapFinished;
+let INSTANCE_NUMBER;
+let actualSwappingIndex;
+let animationThreshold;
+let iterationCounter;
+let iterationThroughArrayCounter;
 
 function getRandomMinMax(min, max) {
     return Math.random() * (max - min) + min;
@@ -53,13 +58,18 @@ function createInstances(howMany) {
 }
 
 function setup() {
-    speed = 10;
+    INSTANCE_NUMBER = 50;
+    speed = 5;
     multiplier = 5;
     isSwapping = false;
     backgroundColor = color(50, 168, 82);
     rectColor = color(createRandomColor())
     createCanvas(800, 600);
-    instances = createInstances(50);
+    instances = createInstances(INSTANCE_NUMBER);
+    actualSwappingIndex = 0;
+    animationThreshold = 4;
+    iterationCounter = 0;
+    iterationThroughArrayCounter = 0;
 }
 
 
@@ -71,12 +81,28 @@ function startSwapTwoFigures(){
 }
     
 function change2ValuesXWhileSwapping(val1, val2){
+    if(!isSwapping){ return; }
+    // checking if values are actually 
+    if(val1.value < val2.value){
+        actualSwappingIndex += 1;
+        return;
+    }
     if(val1.x != val2.old_x){
         if ((val2.old_x - val1.x) > 0) {
-            val1.x += speed;
+            if(Math.abs(val2.old_x - val1.x) < animationThreshold){
+                val1.x += (val2.old_x - val1.x)
+            }
+            else{
+                val1.x += speed;
+            }
         }
         else {
-            val1.x -= speed;
+            if(Math.abs(val2.old_x - val1.x) < animationThreshold){
+                val1.x += (val2.old_x - val1.x)
+            }
+            else{
+                val1.x -= speed;
+            }
         }
     }
     else{
@@ -86,7 +112,12 @@ function change2ValuesXWhileSwapping(val1, val2){
 
     if(val2.x != val1.old_x){
         if ((val2.x - val1.old_x) > 0) {
-            val2.x -= speed;
+            if(Math.abs(val2.x - val1.old_x) < animationThreshold){
+                val2.x -= (val2.x - val1.old_x)
+            }
+            else{
+                val2.x -= speed;
+            }
         }
         else {
             val2.x += speed;
@@ -96,11 +127,20 @@ function change2ValuesXWhileSwapping(val1, val2){
         secondSwapFinished = true;
     }
     if (firstSwapFinished && secondSwapFinished){
-        isSwapping = false;
+        // comment this to do it automatically - one after another swap
+        // isSwapping = false;
+
         val1.old_x = val1.x;
         val2.old_x = val2.x;
         firstSwapFinished = false;
         secondSwapFinished = false;
+        actualSwappingIndex += 1;
+        iterationCounter += 1;
+
+        // changing indexes in instances array
+        let val1_index = instances.indexOf(val1);
+        let val2_index = instances.indexOf(val2);
+        replaceElementsIndexes(instances, val1_index, val2_index);
     }
 }
 
@@ -110,6 +150,23 @@ function keyPressed(){
     }
 }
 
+function replaceElementsIndexes(arr, index1, index2) {
+  // Sprawdź, czy podane indeksy są prawidłowe
+  if (index1 < 0 || index1 >= arr.length || index2 < 0 || index2 >= arr.length) {
+    console.error("Podane indeksy są nieprawidłowe!");
+    return;
+  }
+
+  // Zmień pozycje dwóch elementów
+  const temp = arr[index1];
+  arr[index1] = arr[index2];
+  arr[index2] = temp;
+
+  // Zwróć zmienioną tablicę
+  return arr;
+}
+
+
 
 function draw() {
 
@@ -118,13 +175,30 @@ function draw() {
     
     // swapping
     if (isSwapping){
-        change2ValuesXWhileSwapping(instances[0], instances[30]);
-    }
+        // console.log('actualSwappingIndex', actualSwappingIndex) 
+        // console.log('actualSwappingIndex+1', actualSwappingIndex+1) 
+        if(actualSwappingIndex + 1 > instances.length - 1){
+            // isSwapping = false;
+            actualSwappingIndex = 0;
+            iterationThroughArrayCounter += 1;
+        }
+            change2ValuesXWhileSwapping(
+                instances[actualSwappingIndex],
+                instances[actualSwappingIndex + 1]);
+        }
 
     // drawing rectangles to canvas
     for (let i = 0; i < instances.length; i++) {
         rect(instances[i].x, height - 10, rectangleWidth, -instances[i].value * multiplier);
     }
+    fill(2);
+    textSize(20);
+    // swap counter
+    text('counter', 20, 30);
+    text(iterationCounter, 20, 60)
+    // all array iteration counter
+    text('iteration through array', 150, 30);
+    text(iterationThroughArrayCounter, 150, 60)
 }
 
 class Value {
