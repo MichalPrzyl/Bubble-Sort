@@ -1,6 +1,5 @@
 // colors
 let backgroundColor;
-
 let rectColor;
 
 // values
@@ -10,6 +9,10 @@ let multiplier;
 // rectangles
 let rectangleWidth = 10;
 
+let isSwapping;
+
+// misc
+let speed;
 
 function getRandomMinMax(min, max) {
     return Math.random() * (max - min) + min;
@@ -39,7 +42,8 @@ function createInstances(howMany) {
         const newValueValue = getRandomMinMax(0, 100);
         const newInstance = new Value(
             10 + i * rectangleWidth + 3 * i,
-            newValueValue
+            newValueValue,
+            10 + i * rectangleWidth + 3 * i
         );
         randomInstances.push(newInstance);
     }
@@ -47,80 +51,70 @@ function createInstances(howMany) {
 }
 
 function setup() {
+    speed = 10;
     multiplier = 5;
+    isSwapping = false;
     backgroundColor = color(50, 168, 82);
     rectColor = color(createRandomColor())
     createCanvas(800, 600);
     instances = createInstances(50);
 }
 
-function swapTwoValues(val1, val2){
-    const val1_x = val1.x;
-    const val2_x = val2.x;
 
-    while(val1.x != val2_x){
-        // we need to increase val1.x for one pixel in 
-        // direction of the second Value instance x
-        // val1.x += (val2_x - val1.x) > 0 ? 1 : -1;
-        if ((val2_x - val1.x) > 0) {
-            val1.x += 1;
+
+
+
+function startSwapTwoFigures(){
+    isSwapping = true; 
+}
+    
+function change2ValuesXWhileSwapping(val1, val2){
+    if(val1.x != val2.old_x){
+        if ((val2.old_x - val1.x) > 0) {
+            val1.x += speed;
         }
         else {
-            val1.x -= 1;
+            val1.x -= speed;
+        }
+    }
+
+    if(val2.x != val1.old_x){
+        if ((val2.x - val1.old_x) > 0) {
+            val2.x -= speed;
+        }
+        else {
+            val2.x += speed;
         }
     }
 }
 
 function keyPressed(){
     if (key == 'a'){
-        // swapTwoValues(instances[0], instances[1]);
-        isSwapping = true;
+        startSwapTwoFigures();
     }
 }
-let isSwapping = false;
 
-function changeValuesForSwap(val1, val2){
-    if (!isSwapping) {return;}
-    const val1_x = val1.x;
-    const val2_x = val2.x;
-
-    if(val1.x != val2_x){
-        // we need to increase val1.x for one pixel in 
-        // direction of the second Value instance x
-        // val1.x += (val2_x - val1.x) > 0 ? 1 : -1;
-        if ((val2_x - val1.x) > 0) {
-            val1.x += 1;
-        }
-        else {
-            val1.x -= 1;
-        }
-    }
-
-    if(val2.x != val1_x){
-        // we need to increase val1.x for one pixel in 
-        // direction of the second Value instance x
-        // val1.x += (val2_x - val1.x) > 0 ? 1 : -1;
-        if ((val2.x - val1_x) > 0) {
-            val2.x += 1;
-        }
-        else {
-            val2.x -= 1;
-        }
-    }
-}
 
 function draw() {
+
     background(backgroundColor);
     fill(rectColor);
-    changeValuesForSwap(instances[0], instances[1]);
+    
+    // swapping
+    if (isSwapping){
+        change2ValuesXWhileSwapping(instances[0], instances[30]);
+    }
+
+    // drawing rectangles to canvas
     for (let i = 0; i < instances.length; i++) {
         rect(instances[i].x, height - 10, rectangleWidth, -instances[i].value * multiplier);
     }
 }
 
 class Value {
-    constructor(x, value) {
+    constructor(x, value, old_x) {
         this.x = x;
         this.value = value;
+        this.old_x = old_x;
     }
 }
